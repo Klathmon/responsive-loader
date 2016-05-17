@@ -3,6 +3,8 @@ var path = require('path');
 var loaderUtils = require('loader-utils');
 var jimp = require('jimp');
 var queue = require('queue-async');
+var Imagemin = require('imagemin');
+var imageminPngquant = require('imagemin-pngquant');
 
 var MIMES = {
   'jpg': 'image/jpeg',
@@ -86,6 +88,7 @@ module.exports = function(content) {
 
     q.awaitAll(function(err, files) {
       var srcset = files.map(function(f) {
+        console.log(f)
         return f.src;
       }).join('+","+');
 
