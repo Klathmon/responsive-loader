@@ -64,7 +64,7 @@ module.exports = function(content) {
 
             loaderContext.emitFile(fileName, buf);
 
-            loaderContext.loadModule(fileName, function(err, source, map, module) {
+            loaderContext.resolve('', fileName, function(err, source, map, module) {
               loaderContext.emitFile(fileName, buf);
 
               queueCallback(null, {
