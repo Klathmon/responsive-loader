@@ -64,11 +64,16 @@ module.exports = function(content) {
 
             loaderContext.emitFile(fileName, buf);
 
-            queueCallback(null, {
-              src: '__webpack_public_path__ + ' + JSON.stringify(fileName + ' ' + width + 'w'),
-              path: '__webpack_public_path__ + ' + JSON.stringify(fileName),
-              width: width
-            });
+            loaderContext.loadModule(fileName, function(err, source, map, module) {
+              loaderContext.emitFile(fileName, buf);
+
+              queueCallback(null, {
+                src: '__webpack_public_path__ + ' + JSON.stringify(fileName + ' ' + width + 'w'),
+                path: '__webpack_public_path__ + ' + JSON.stringify(fileName),
+                width: width
+              });
+            })
+
           });
     }
 
@@ -88,7 +93,6 @@ module.exports = function(content) {
 
     q.awaitAll(function(err, files) {
       var srcset = files.map(function(f) {
-        console.log(f)
         return f.src;
       }).join('+","+');
 
