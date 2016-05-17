@@ -23,8 +23,8 @@
   },
   "homepage": "https://github.com/herrstucki/responsive-loader",
   "dependencies": {
-    "imagemin": "^5.1.2",
-    "imagemin-pngquant": "^5.0.0",
+    "imagemin-pngquant": "^4.2.0",
+    "imagemin": "^4.0.0",
     "loader-utils": "^0.2.12",
     "queue-async": "^1.0.7"
   },

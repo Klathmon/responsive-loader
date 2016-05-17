@@ -17,6 +17,16 @@ module.exports = function(content) {
   var loaderCallback = this.async();
   var query = loaderUtils.parseQuery(this.query);
   var options = this.options.responsiveLoader || {};
+  var imageLoaderOptions = {
+  bypassOnDebug: false,
+  progressive: true,
+  interlaced: true,
+  optimizationLevel: 7,
+  pngquant: {
+    quality: '95-100',
+    speed: 1
+  }
+};
   var sizes = query.sizes || query.size || [Number.MAX_SAFE_INTEGER];
   var name = query.name || '[hash]-[width].';
   // JPEG compression
@@ -60,20 +70,39 @@ module.exports = function(content) {
               return queueCallback(err);
             }
 
-            var fileName = loaderUtils.interpolateName(loaderContext, name + ext, {content: buf}).replace(/\[width\]/ig, width);
+            var imagemin = new Imagemin()
+            .src(buf)
+            .use(Imagemin.gifsicle({
+              interlaced: imageLoaderOptions.interlaced
+            }))
+            .use(Imagemin.jpegtran({
+              progressive: imageLoaderOptions.progressive
+            }))
+            .use(Imagemin.svgo(imageLoaderOptions.svgo));
 
-            loaderContext.emitFile(fileName, buf);
+            if (imageLoaderOptions.pngquant) {
+              imagemin.use(imageminPngquant(imageLoaderOptions.pngquant));
+            } else {
+              imagemin.use(Imagemin.optipng({
+                optimizationLevel: imageLoaderOptions.optimizationLevel
+              }));
+            }
 
-            loaderContext.resolve('', fileName, function(err, source, map, module) {
-              loaderContext.emitFile(fileName, buf);
+            imagemin.run(function(err, files) {
+              if (err) {
+                queueCallback(err);
+              }
+
+              var fileName = loaderUtils.interpolateName(loaderContext, name + ext, {content: files[0].contents}).replace(/\[width\]/ig, width);
+
+              loaderContext.emitFile(fileName, files[0].contents);
 
               queueCallback(null, {
                 src: '__webpack_public_path__ + ' + JSON.stringify(fileName + ' ' + width + 'w'),
                 path: '__webpack_public_path__ + ' + JSON.stringify(fileName),
                 width: width
               });
-            })
-
+            });
           });
     }
 
